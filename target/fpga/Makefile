@@ -7,9 +7,9 @@ include $(PULPISSIMO_ROOT)/utils/utils.mk
 
 ## @section FPGA Bitstream Generation
 
-all: genesys2 zcu104 nexys_video nexys zedboard zcu102 zcu106 ## Generates the bitstream for all supported boards board.
+all: genesys2 zcu104 nexys_video nexys arty zedboard zcu102 zcu106 ## Generates the bitstream for all supported boards board.
 
-clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_nexys clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
+clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_arty clean_nexys clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
 
 .PHONY: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
 $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl:
@@ -81,6 +81,18 @@ clean_nexys:
 	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys.bit
 	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_nexys.bin
 
+## Generates the bistream for the arty board. Use make arty rev=[artyA7-35T|artyA7-100T]
+arty: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty all
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty/pulpissimo-arty.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_arty.bit
+	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty/pulpissimo-arty.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_arty.bin
+	@echo "Bitstream generation for arty board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_arty.bit and ./pulpissimo_arty.bin"
+
+## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the arty board.
+clean_arty:
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty clean
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_arty.bit
+	rm -f $(PULPISSIMO_FPGA_ROOT)/pulpissimo_arty.bin
 ## Generates the bistream for the vcu108 board
 vcu108: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
 	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-vcu108 all

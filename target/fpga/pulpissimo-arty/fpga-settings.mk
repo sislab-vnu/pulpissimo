@@ -14,7 +14,7 @@ ifeq ($(rev), artyA7-35T)
 endif
 ifeq ($(rev), artyA7-100T)
 	export XILINX_PART=xc7a100tcsg324-1
-	export XILINX_BOARD=digilentinc.com:arty-a7-100:1.0
+	export XILINX_BOARD=digilentinc.com:arty-a7-100:part0:1.0
 endif
 #Check if one was found
 ifndef XILINX_PART

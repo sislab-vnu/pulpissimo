@@ -201,12 +201,15 @@ module pulpissimo #(
     .dft_test_en_i     ( s_dft_test_en                                                          ),
     .cfg_clk_i         ( s_soc_clk                                                              ), // Interface is synchronous to SoC clock
     .cfg_bus_slave     ( s_apb_fll_ctrl_bus                                                     ),
+    .slow_byp_clk_i    ( s_ref_clk                                                              ),
     .slow_clk_en_i     ( s_slow_clk_en                                                          ),
     .slow_clk_byp_en_i ( s_slow_clk_byp_en | s_pad_global_clk_byp_en | s_jtag_global_clk_byp_en ),
     .slow_clk_o        ( s_slow_clk                                                             ),
+    .soc_byp_clk_i     ( s_ref_clk                                                              ),
     .soc_clk_en_i      ( s_soc_clk_en                                                           ),
     .soc_clk_byp_en_i  ( s_soc_clk_byp_en | s_pad_global_clk_byp_en | s_jtag_global_clk_byp_en  ),
     .soc_clk_o         ( s_soc_clk                                                              ),
+    .per_byp_clk_i     ( s_ref_clk                                                              ),
     .per_clk_en_i      ( s_per_clk_en                                                           ),
     .per_clk_byp_en_i  ( s_per_clk_byp_en | s_pad_global_clk_byp_en | s_jtag_global_clk_byp_en  ),
     .per_clk_o         ( s_per_clk                                                              )

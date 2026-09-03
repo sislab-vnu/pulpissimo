@@ -11,17 +11,17 @@ in the `fpga` folder. The generated bitstream will be copied into the fpga folde
 ## Bitstream Download
 To download this bitstream into the FPGA connect the PROG USB header, turn the board on and run
 ```Shell
-make -C pulpissimo-arty download
+make -C pulpissimo-arty download rev=artyA7-100T
 ```
 
 ## Default SoC and Core Frequencies
 
 By default the clock generating IPs are synthesized to provide the following frequencies to PULPissimo:
 
-| Clock Domain   | Default Frequency on Arty A7 board |
-|----------------|------------------------------------|
-| Core Frequency | 10 MHz                             |
-| SoC Frequency  | 5 MHz                              |
+| Clock Domain         | Default Frequency on Arty A7 board |
+|----------------------|------------------------------------|
+| SoC/Core Frequency   | 10 MHz                             |
+| Peripheral Frequency | 5 MHz                              |
 
 
 ## Peripherals
@@ -33,7 +33,7 @@ PULPissimo is connected to the following board peripherals:
 | `SPIM0`        | PMOD C Pins 1-8         |
 | `SDIO`         | PMOD D                  |
 | `I2C`          | SCL/SDA (ChipKit_IO)    |
-| `I2S`          | PMOD B Pins 7-10        |
+| GPIO pads      | PMOD B Pins 1-4         |
 | `JTAG`         | PMOD A Pins 1-4         |
 | `spim_csn1`    | LED0                    |
 | `cam_pclk`     | LED1                    |
@@ -48,6 +48,10 @@ PULPissimo is connected to the following board peripherals:
 | `cam_data7`    | Button 4                |
 
 For more information consult board constraint files.
+
+The current uDMA configuration does not instantiate I2S. The PMOD B signals
+retain their legacy I2S-oriented wrapper names but are available as muxed GPIO
+pads.
 
 ### UART
 PULPissimo's UART port is mapped to the onboard FTDI FT2232H USB-UART bridge and thus accessible through the UART micro-USB connector (J6).
@@ -85,6 +89,5 @@ If you have Vivado running remember to disconnect the target and close HW Manage
 
 
 ```Shell
-$OPENOCD/bin/openocd -f pulpissimo-nexys4/openocd-nexys-hs2.cfg
+$OPENOCD/bin/openocd -f pulpissimo-arty/openocd-arty-hs2.cfg
 ```
-

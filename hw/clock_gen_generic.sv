@@ -54,19 +54,19 @@ module clock_gen #(
 
   // Output clocks
   // Slow clock is the 32 kHz clock used for the certain timers
+  input logic  slow_byp_clk_i,
   input logic  slow_clk_en_i,
-  input logic  slow_clk_byp_en_i, // feed slow_clk_o directly from ref_clk_i,
-                                  // this particular implementation already uses
-                                  // a ref clock of 32kHz so this port is
-                                  // unconnected.
+  input logic  slow_clk_byp_en_i,
   output logic slow_clk_o,
   // The SoC clock drives the complete SoC domain (should be as fast or faster
   // than per_clk_o)
+  input logic  soc_byp_clk_i,
   input logic  soc_clk_en_i,
   input logic  soc_clk_byp_en_i,
   output logic soc_clk_o,
 
   // Clock that drives IO buffers within IO peripherals
+  input logic  per_byp_clk_i,
   input logic  per_clk_en_i,
   input logic  per_clk_byp_en_i,
   output logic per_clk_o
@@ -76,6 +76,7 @@ module clock_gen #(
   logic        s_clk_soc_ungated;
   logic        s_clk_fll_per;
   logic        s_clk_per_ungated;
+  logic        s_clk_slow_ungated;
 
   // Convert APB interface to FLL native interface
   FLL_BUS fll_bus[2](.clk_i(cfg_clk_i));
@@ -125,7 +126,7 @@ module clock_gen #(
 
   tc_clk_mux2 i_fll_soc_bypass_mux (
     .clk0_i    ( s_clk_fll_soc     ),
-    .clk1_i    ( ref_clk_i         ),
+    .clk1_i    ( soc_byp_clk_i     ),
     .clk_sel_i ( soc_clk_byp_en_i  ),
     .clk_o     ( s_clk_soc_ungated )
   );
@@ -168,7 +169,7 @@ module clock_gen #(
 
   tc_clk_mux2 i_fll_per_bypass_mux (
     .clk0_i    ( s_clk_fll_per     ),
-    .clk1_i    ( ref_clk_i         ),
+    .clk1_i    ( per_byp_clk_i     ),
     .clk_sel_i ( per_clk_byp_en_i  ),
     .clk_o     ( s_clk_per_ungated )
   );
@@ -185,13 +186,17 @@ module clock_gen #(
   // Slow Clock //
   ////////////////
 
+  tc_clk_mux2 i_slow_clk_bypass_mux (
+    .clk0_i    ( ref_clk_i          ),
+    .clk1_i    ( slow_byp_clk_i     ),
+    .clk_sel_i ( slow_clk_byp_en_i  ),
+    .clk_o     ( s_clk_slow_ungated )
+  );
+
   tc_clk_gating #(.IS_FUNCTIONAL(1'b1)) i_slow_clk_en(
-    .clk_i     ( ref_clk_i     ),
+    .clk_i     ( s_clk_slow_ungated ),
     .en_i      ( slow_clk_en_i ),
     .test_en_i ( dft_test_en_i ),
     .clk_o     ( slow_clk_o    )
   );
-
-  // This implementation does not need the bypass signal since slow clock already == ref_clk
-  unread i_unused_slow_clk_bypass_en(.d_i(slow_clk_byp_en_i));
 endmodule

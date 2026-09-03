@@ -105,9 +105,9 @@ all: $(BOOTCODE) $(BOOTCODE_FPGA) boot.rtl boot.gvsoc
 $(BOOTCODE):      CPPFLAGS += -DPERIPH_FREQUENCY=18000000 -DCONFIG_FLL
 $(BOOTCODE):      $(OBJS)
 
-# FPGA bootrom 10 MHz periph freq
+# FPGA bootrom 5 MHz periph freq
 # need separate objects
-$(BOOTCODE_FPGA): CPPFLAGS += -DPERIPH_FREQUENCY=10000000
+$(BOOTCODE_FPGA): CPPFLAGS += -DPERIPH_FREQUENCY=5000000
 $(BOOTCODE_FPGA): $(addsuffix .2,$(OBJS))
 
 # Makefile implicit rules for .o

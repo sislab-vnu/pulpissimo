@@ -44,12 +44,8 @@ add_files -norecurse $FPGA_RTL/xilinx_pulpissimo.v
 read_ip $FPGA_IPS/xilinx_clk_mngr/xilinx_clk_mngr.srcs/sources_1/ip/xilinx_clk_mngr/xilinx_clk_mngr.xci
 read_ip $FPGA_IPS/xilinx_slow_clk_mngr/xilinx_slow_clk_mngr.srcs/sources_1/ip/xilinx_slow_clk_mngr/xilinx_slow_clk_mngr.xci
 
-# Add wrappers and xilinx specific techcells
-add_files -norecurse $FPGA_RTL/fpga_clk_gen.sv
-add_files -norecurse $FPGA_RTL/fpga_slow_clk_gen.sv
-add_files -norecurse $FPGA_RTL/fpga_bootrom.sv
-add_files -norecurse $FPGA_RTL/pad_functional_xilinx.sv
-add_files -norecurse $FPGA_RTL/pulp_clock_gating_xilinx.sv
+# Add the CV32E40P-specific clock-gating wrapper. Generic Xilinx pad and clock
+# cells are already supplied by tech_cells_generic through Bender.
 add_files -norecurse $FPGA_RTL/cv32e40p_clock_gate_xilinx.sv
 
 # set pulpissimo as top
@@ -59,9 +55,12 @@ set_property top xilinx_pulpissimo [current_fileset]; #
 update_compile_order -fileset sources_1
 
 # Add constraints
-#Depends on revision of Nexys board
+# Depends on the Arty board revision.
 set rev $::env(rev)
 add_files -fileset constrs_1 -norecurse $CONSTRS/arty-a7.xdc
+add_files -fileset constrs_1 -norecurse $CONSTRS/arty-a7-impl.xdc
+set_property USED_IN_SYNTHESIS false [get_files */arty-a7-impl.xdc]
+set_property PROCESSING_ORDER LATE [get_files */arty-a7-impl.xdc]
 
 
 

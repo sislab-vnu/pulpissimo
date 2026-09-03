@@ -1,6 +1,10 @@
 # PULPissimo on the Digilent Arty A7 Boards
 [\[Documentation Arty A7 (35T/100T)\]](https://digilent.com/reference/programmable-logic/arty-a7/reference-manual)
 
+See [Arty A7 FPGA and Default RTL Simulation](FPGA_VS_SIMULATION.md) for the
+platform differences that affect clocks, software, program loading, peripherals,
+and verification results.
+
 ## Bitstream Generation
 The Makefile can handle all revisions of the Arty A7 board. You can generate the Bitfile for the desired revision by running
 ```Shell
@@ -62,7 +66,9 @@ Arty boards have 3 types of Flash memory depending on the PCB revision which can
 - Spansion/Infineon S25FL128SAG[M|N]FI00
 - Spansion/Infineon S25FL127SABMFx00
 
-It also can be used for user applications. 
+The configuration flash is not currently connected to PULPissimo for user
+applications because its clock requires an FPGA startup primitive that is
+disabled in the board wrapper.
 
 ### Reset Button
 The RESET button (C12) resets the RISC-V CPU.

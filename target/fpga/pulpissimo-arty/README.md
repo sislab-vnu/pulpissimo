@@ -5,6 +5,9 @@ See [Arty A7 FPGA and Default RTL Simulation](FPGA_VS_SIMULATION.md) for the
 platform differences that affect clocks, software, program loading, peripherals,
 and verification results.
 
+See [Running PULPissimo on Arty A7-100T](RUN_ARTY_A7_100T.md) for the complete,
+verified FPGA programming, OpenOCD, GDB, and UART workflow.
+
 ## Bitstream Generation
 The Makefile can handle all revisions of the Arty A7 board. You can generate the Bitfile for the desired revision by running
 ```Shell
@@ -17,6 +20,16 @@ To download this bitstream into the FPGA connect the PROG USB header, turn the b
 ```Shell
 make -C pulpissimo-arty download rev=artyA7-100T
 ```
+
+Alternatively, program the volatile FPGA configuration through the onboard
+Digilent JTAG interface with `xc3sprog`:
+
+```Shell
+$XC3SPROG -c nexys4 pulpissimo_arty.bit
+```
+
+Program the FPGA before starting OpenOCD. The onboard JTAG interface configures
+the FPGA; it does not connect to the PULPissimo JTAG port.
 
 ## Default SoC and Core Frequencies
 
@@ -58,7 +71,14 @@ retain their legacy I2S-oriented wrapper names but are available as muxed GPIO
 pads.
 
 ### UART
-PULPissimo's UART port is mapped to the onboard FTDI FT2232H USB-UART bridge and thus accessible through the UART micro-USB connector (J6).
+PULPissimo's UART port is mapped to the onboard FTDI FT2232H USB-UART bridge and thus accessible through the UART micro-USB connector (J6). The baud rate is 115200.
+
+List the serial ports and open the Digilent port with PySerial miniterm:
+
+```Shell
+python3 -m serial.tools.list_ports -v
+python3 -m serial.tools.miniterm "$UART_PORT" 115200 --raw --dtr 0 --rts 0
+```
 
 ### QSPI-Flash
 Arty boards have 3 types of Flash memory depending on the PCB revision which can be used for configuration of the FPGA:
@@ -86,8 +106,14 @@ Therefore you need an external JTAG programmer device connected to PMOD A. The p
 | GND         | JA5      |
 | VCC (trgt)  | JA6      |
 
-The directory holding this README contains a OpenOCD configuration file for a tested adapter.
+The directory holding this README contains OpenOCD configuration files for tested adapters.
 The commands below are to be executed from within the `fpga` directory.
+
+#### Olimex ARM-USB-OCD-H
+
+```Shell
+$OPENOCD/bin/openocd -f pulpissimo-arty/openocd-arty-olimex.cfg
+```
 
 #### Digilent HS-2
 
@@ -97,3 +123,30 @@ If you have Vivado running remember to disconnect the target and close HW Manage
 ```Shell
 $OPENOCD/bin/openocd -f pulpissimo-arty/openocd-arty-hs2.cfg
 ```
+
+### Loading Software
+
+With OpenOCD running, load an FPGA-mode ELF using the PULP RISC-V GDB:
+
+```Shell
+$PULP_RISCV_GCC_TOOLCHAIN/bin/riscv32-unknown-elf-gdb \
+  -ex "target remote localhost:3333" \
+  -ex "monitor halt" \
+  -ex load \
+  -ex "set \$pc = _start" \
+  -ex "monitor resume" \
+  -ex detach \
+  PATH_TO_ELF
+```
+
+For example, build the hello application from the repository root with UART
+output enabled for FPGA operation:
+
+```Shell
+export PULPRT_CONFIG_CFLAGS="-I$PWD/sw/pulp-runtime/drivers/pulpissimo/rtl_sim/io_mux/include"
+source sw/pulp-runtime/configs/pulpissimo_cv32.sh
+make -C sw/regression_tests/hello clean all platform=fpga
+```
+
+The extra include path works around the runtime's FPGA build omitting the path
+to the unconditionally included `io_mux.h` header.

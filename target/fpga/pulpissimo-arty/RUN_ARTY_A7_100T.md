@@ -77,7 +77,7 @@ FPGA platform so the runtime uses UART rather than simulation output:
 
 ```shell
 export PULPRT_CONFIG_CFLAGS="-I$PWD/sw/pulp-runtime/drivers/pulpissimo/rtl_sim/io_mux/include"
-source sw/pulp-runtime/configs/pulpissimo_cv32.sh
+source sw/pulp-runtime/configs/pulpissimo_cv32_zfinx.sh
 make -C sw/regression_tests/hello clean all platform=fpga
 ```
 
@@ -162,6 +162,13 @@ UART_PORT="$UART_PORT" \
 Set `OPENOCD_CONFIG` to
 `target/fpga/pulpissimo-arty/openocd-arty-hs2.cfg` when using a Digilent HS2
 instead of the Olimex adapter.
+
+## PlatformIO
+
+Repository-local PlatformIO support provides build, FPGA programming, firmware
+upload, debugging, and serial-monitor integration for this setup. See
+[`platformio/README.md`](../../../platformio/README.md) and open one of the
+projects under `platformio/examples`.
 
 ## Troubleshooting
 

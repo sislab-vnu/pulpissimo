@@ -1,0 +1,28 @@
+{
+  "build": {
+    "f_cpu": "10000000L",
+    "f_peripheral": "5000000L",
+    "mabi": "ilp32",
+    "march": "rv32imc_zfinx_xcorev",
+    "mcu": "cv32e40p"
+  },
+  "debug": {},
+  "frameworks": [
+    "pulp-runtime"
+  ],
+  "name": "PULPissimo on Digilent Arty A7-100T",
+  "platforms": [
+    "pulpissimo"
+  ],
+  "upload": {
+    "bitstream_file": "target/fpga/pulpissimo_arty.bit",
+    "maximum_ram_size": 327680,
+    "maximum_size": 327676,
+    "protocol": "olimex-arm-usb-ocd-h",
+    "protocols": [
+      "olimex-arm-usb-ocd-h"
+    ]
+  },
+  "url": "https://digilent.com/reference/programmable-logic/arty-a7/reference-manual",
+  "vendor": "PULP Platform / Digilent"
+}

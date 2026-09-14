@@ -56,13 +56,13 @@ PULPissimo is connected to the following board peripherals:
 | `cam_pclk`     | LED1                    |
 | `cam_hsync`    | LED2                    |
 | `cam_data0`    | LED3                    |
-| `cam_data1`    | Switch 1                |
-| `cam_data2`    | Switch 2                |
-| `cam_data3`    | Switch 0                |
-| `cam_data4`    | Button 1                |
-| `cam_data5`    | Button 2                |
-| `cam_data6`    | Button 3                |
-| `cam_data7`    | Button 4                |
+| `cam_data1`    | Switch 0                |
+| `cam_data2`    | Switch 1                |
+| `cam_data3`    | Center button           |
+| `cam_data4`    | Down button             |
+| `cam_data5`    | Left button             |
+| `cam_data6`    | Right button            |
+| `cam_data7`    | Up button               |
 
 For more information consult board constraint files.
 
@@ -144,9 +144,16 @@ output enabled for FPGA operation:
 
 ```Shell
 export PULPRT_CONFIG_CFLAGS="-I$PWD/sw/pulp-runtime/drivers/pulpissimo/rtl_sim/io_mux/include"
-source sw/pulp-runtime/configs/pulpissimo_cv32.sh
+source sw/pulp-runtime/configs/pulpissimo_cv32_zfinx.sh
 make -C sw/regression_tests/hello clean all platform=fpga
 ```
 
 The extra include path works around the runtime's FPGA build omitting the path
 to the unconditionally included `io_mux.h` header.
+
+### PlatformIO
+
+Repository-local PlatformIO IDE and CLI support is available under
+[`platformio/`](../../../platformio/README.md). The included example projects
+support building, bitstream programming with the onboard Digilent adapter,
+firmware upload and debugging with the Olimex adapter, and UART monitoring.

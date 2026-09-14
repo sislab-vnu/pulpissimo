@@ -10,3 +10,5 @@ working_dir/
 /utils/bin/padrick
 /Bender.local
 /build
+/.pio-platforms
+/platformio/__pycache__/

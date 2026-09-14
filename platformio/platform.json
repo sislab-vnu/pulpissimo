@@ -1,0 +1,30 @@
+{
+  "name": "pulpissimo",
+  "title": "PULPissimo",
+  "description": "Repository-local PlatformIO support for PULPissimo FPGA targets",
+  "homepage": "https://github.com/pulp-platform/pulpissimo",
+  "license": "Apache-2.0",
+  "keywords": [
+    "PULPissimo",
+    "CV32E40P",
+    "CORE-V",
+    "RISC-V"
+  ],
+  "engines": {
+    "platformio": "^6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pulp-platform/pulpissimo.git"
+  },
+  "version": "0.2.0",
+  "frameworks": {
+    "pulp-runtime": {
+      "script": "builder/frameworks/pulp-runtime.py",
+      "description": "PULP Runtime Environment from this PULPissimo checkout",
+      "homepage": "https://github.com/pulp-platform/pulp-runtime",
+      "title": "PULP Runtime Environment"
+    }
+  },
+  "packages": {}
+}

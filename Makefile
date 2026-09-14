@@ -63,6 +63,43 @@ hw/padframe/pulpissimo_padframe_fpga_autogen: $(PULPISSIMO_UTILS)/padrick
 gpio-reconfigure:
 	$(MAKE) -C hw/vendored_ips/gpio reconfigure
 
+## @section PlatformIO
+
+PIO ?= pio
+PLATFORMIO_PYTHON ?= python3
+PLATFORMIO_PLATFORMS_DIR ?= $(CURDIR)/.pio-platforms
+PLATFORMIO_SMOKE_TIMEOUT ?= 30
+PLATFORMIO_EXAMPLE_DIRS := $(sort $(dir $(wildcard platformio/examples/*/platformio.ini)))
+
+.PHONY: platformio-examples
+## Build all repository PlatformIO examples
+## @param PIO=pio PlatformIO Core command
+## @param PLATFORMIO_PLATFORMS_DIR=.pio-platforms Checkout-local platform package directory
+platformio-examples:
+	@set -e; \
+	for project in $(PLATFORMIO_EXAMPLE_DIRS); do \
+		echo "Building $$project"; \
+		PULPISSIMO_ROOT="$(CURDIR)" \
+		PLATFORMIO_PLATFORMS_DIR="$(PLATFORMIO_PLATFORMS_DIR)" \
+		$(PIO) run --project-dir "$$project"; \
+	done
+
+.PHONY: platformio-smoke
+## Run UART-observable PlatformIO smoke tests on the Arty A7-100T
+## @param UART_PORT=/dev/ttyUSB2 Digilent USB-UART device
+## @param PIO=pio PlatformIO Core command
+## @param PLATFORMIO_PYTHON=python3 Python 3 command
+## @param PLATFORMIO_PLATFORMS_DIR=.pio-platforms Checkout-local platform package directory
+## @param PLATFORMIO_SMOKE_TIMEOUT=30 Per-example timeout in seconds
+platformio-smoke:
+	PULPISSIMO_ROOT="$(CURDIR)" \
+	PLATFORMIO_PLATFORMS_DIR="$(PLATFORMIO_PLATFORMS_DIR)" \
+	$(PLATFORMIO_PYTHON) platformio/hardware_smoke.py \
+		--pio "$(PIO)" \
+		--port "$(UART_PORT)" \
+		--timeout "$(PLATFORMIO_SMOKE_TIMEOUT)" \
+		$(PLATFORMIO_SMOKE_ARGS)
+
 HELP_TITLE="PULPissimo Build & SIM Environment"
 HELP_DESCRIPTION="Toplevel targets for building and simulating PULPissimo. Please check the make files in the subdirectories for additional targets.."
 include $(PULPISSIMO_ROOT)/utils/help.mk

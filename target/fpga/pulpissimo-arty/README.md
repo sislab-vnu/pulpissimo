@@ -81,14 +81,40 @@ python3 -m serial.tools.miniterm "$UART_PORT" 115200 --raw --dtr 0 --rts 0
 ```
 
 ### QSPI-Flash
-Arty boards have 3 types of Flash memory depending on the PCB revision which can be used for configuration of the FPGA:
-- Micron N25Q128A
-- Spansion/Infineon S25FL128SAG[M|N]FI00
-- Spansion/Infineon S25FL127SABMFx00
+The Arty A7-100T onboard configuration flash can hold both the FPGA image and a
+PULP flash-v2 application. The dedicated build leaves the normal `make arty`
+mapping unchanged and remaps SPIM0 from PMOD C to the onboard flash. The flash
+layout is:
 
-The configuration flash is not currently connected to PULPissimo for user
-applications because its clock requires an FPGA startup primitive that is
-disabled in the board wrapper.
+| Address range | Contents |
+|---------------|----------|
+| `0x00000000` to `0x003FFFFF` | FPGA configuration |
+| `0x00400000` onward | PULP application |
+
+Build the combined MCS image from the `target/fpga` directory. `APP_ELF` should
+be an absolute path to an FPGA-mode executable:
+
+```Shell
+make arty_flash rev=artyA7-100T APP_ELF=/absolute/path/to/application.elf
+```
+
+Program and verify the onboard flash with:
+
+```Shell
+make program_arty_flash rev=artyA7-100T \
+  APP_ELF=/absolute/path/to/application.elf
+```
+
+This erases the board's existing persistent FPGA image. The default
+configuration-memory part is the Spansion/Infineon S25FL128S. For a board with
+the Micron N25Q128A, add
+`CFGMEM_PART=mt25ql128-spi-x1_x2_x4`. Use `HW_SERVER_URL` when Vivado's hardware
+server is not at `TCP:localhost:3121`, and `HW_TARGET` when that server exposes
+multiple targets.
+
+After programming, power-cycle the board or use Vivado's `boot_hw_device` to
+configure the FPGA and start the application from flash. UART output remains at
+115200 baud.
 
 ### Reset Button
 The RESET button (C12) resets the RISC-V CPU.

@@ -20,3 +20,4 @@ gmon.out
 /pulpissimo-arty/**/pulpissimo.bit
 
 **/xdc/constraints.xdc
+/flash/

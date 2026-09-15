@@ -5,12 +5,34 @@ set RTL ../../../rtl
 set IPS ../../../ips
 set CONSTRS constraints
 
+set ONBOARD_FLASH 0
+if {[info exists ::env(ARTY_ONBOARD_FLASH)] && $::env(ARTY_ONBOARD_FLASH) ne "0"} {
+    set ONBOARD_FLASH 1
+    if {$::env(XILINX_PART) ne "xc7a100tcsg324-1"} {
+        error "The onboard-flash build currently supports only artyA7-100T"
+    }
+}
+
 # create project
 create_project $PROJECT . -force -part $::env(XILINX_PART)
 set_property board_part $XILINX_BOARD [current_project]
 
 # Add sources
 source ../pulpissimo/tcl/add_sources.tcl
+
+if {$ONBOARD_FLASH} {
+    set default_fpga_rom [get_files -quiet *fpga_autogen_rom.sv]
+    if {[llength $default_fpga_rom] != 1} {
+        error "Expected exactly one default FPGA boot ROM, found [llength $default_fpga_rom]"
+    }
+    remove_files $default_fpga_rom
+
+    set onboard_fpga_rom ../../../sw/bootcode/build/arty/fpga_autogen_rom.sv
+    if {![file exists $onboard_fpga_rom]} {
+        error "Missing onboard-flash boot ROM: $onboard_fpga_rom"
+    }
+    add_files -norecurse $onboard_fpga_rom
+}
 
 # Override IPSApprox default variables
 set FPGA_RTL rtl
@@ -61,6 +83,10 @@ add_files -fileset constrs_1 -norecurse $CONSTRS/arty-a7.xdc
 add_files -fileset constrs_1 -norecurse $CONSTRS/arty-a7-impl.xdc
 set_property USED_IN_SYNTHESIS false [get_files */arty-a7-impl.xdc]
 set_property PROCESSING_ORDER LATE [get_files */arty-a7-impl.xdc]
+if {$ONBOARD_FLASH} {
+    add_files -fileset constrs_1 -norecurse $CONSTRS/arty-a7-onboard-flash.xdc
+    set_property PROCESSING_ORDER LATE [get_files */arty-a7-onboard-flash.xdc]
+}
 
 
 
@@ -79,8 +105,17 @@ set_property needs_refresh false [get_runs synth_1]
 # pad driver also drives the input creating a datapath from pad_xy_o to pad_xy_i)
 # Disconnect the nets and connect them to ground to avoid issues in optimization
 remove_cell i_pulpissimo/i_padframe/i_pulpissimo_pads/i_all_pads/i_all_pads_pads/i_pad_bootsel*
-disconnect_net -objects [get_nets i_pulpissimo/i_soc_domain/bootsel_i*]
-connect_net -objects [get_nets i_pulpissimo/i_soc_domain/bootsel_i*] -net i_pulpissimo/<const0>
+set bootsel_nets [lsort [get_nets i_pulpissimo/i_soc_domain/bootsel_i*]]
+if {[llength $bootsel_nets] != 2} {
+    error "Expected two boot-select nets, found [llength $bootsel_nets]"
+}
+disconnect_net -objects $bootsel_nets
+connect_net -objects $bootsel_nets -net i_pulpissimo/<const0>
+if {$ONBOARD_FLASH} {
+    set qspi_boot_bit [lindex $bootsel_nets 1]
+    disconnect_net -objects $qspi_boot_bit
+    connect_net -objects $qspi_boot_bit -net i_pulpissimo/<const1>
+}
 
 remove_cell i_pulpissimo/i_padframe/i_pulpissimo_pads/i_all_pads/i_all_pads_pads/i_pad_hyper*
 disconnect_net -objects [get_nets i_pulpissimo/i_soc_domain/pad_to_hyper_i*]

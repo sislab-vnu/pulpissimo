@@ -98,32 +98,9 @@ module xilinx_pulpissimo (
 	// 	.O(tck_int)
 	// );
 
-  // The SPI-Flash SCK Pin P8 is a configuration pin
-  // Therefore we must use a primitive to access it
-  // Thes SPI flash is currently not in use as an extended modification of the pad_frame is nessecary
-  // (IOBUF of the Pads can only drive signal connected to an I/O pin and not a signal to another primitive).
-  
-  //wire  [3:0] su_nc;  // Startup primitive output, no connect
-  // STARTUPE2 #(
-  //     .PROG_USR("FALSE"),  // Activate program event security feature. Requires encrypted bitstreams.
-  //     .SIM_CCLK_FREQ(0.0)  // Set the Configuration Clock Frequency(ns) for simulation.
-  //  )
-  //  STARTUPE2_inst (
-  //     .CFGCLK(su_nc[0]),       // 1-bit output: Configuration main clock output
-  //     .CFGMCLK(su_nc[1]),     // 1-bit output: Configuration internal oscillator clock output
-  //     .EOS(su_nc[2]),             // 1-bit output: Active high output signal indicating the End Of Startup.
-  //     .PREQ(su_nc[3]),           // 1-bit output: PROGRAM request to fabric output
-  //     .CLK(1'b0),             // 1-bit input: User start-up clock input
-  //     .GSR(1'b0),             // 1-bit input: Global Set/Reset input (GSR cannot be used for the port name)
-  //     .GTS(1'b0),             // 1-bit input: Global 3-state input (GTS cannot be used for the port name)
-  //     .KEYCLEARB(1'b0), // 1-bit input: Clear AES Decrypter Key input from Battery-Backed RAM (BBRAM)
-  //     .PACK(1'b0),           // 1-bit input: PROGRAM acknowledge input
-  //     .USRCCLKO(pad_spim_sck),   // 1-bit input: User CCLK input -> the access to SPI SCK
-  //     .USRCCLKTS(1'b0), // 1-bit input: User CCLK 3-state enable input
-  //     .USRDONEO(1'b1),   // 1-bit input: User DONE pin output control
-  //     .USRDONETS(1'b1)  // 1-bit input: User DONE 3-state enable outpu
-
-  //  );
+  // Arty A7 Rev E exposes the onboard QSPI clock on regular user I/O L16.
+  // The onboard-flash build remaps these existing SPIM0 ports in a late XDC;
+  // unlike boards wired through CCLK, no STARTUPE2 primitive is required.
 
   pulpissimo #(
     .CORE_TYPE(CORE_TYPE),

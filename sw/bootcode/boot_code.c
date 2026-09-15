@@ -30,6 +30,14 @@
 #define BOOT_STACK_SIZE 1024
 #define MAX_NB_AREA 16
 
+#ifndef FLASH_IMAGE_OFFSET
+#define FLASH_IMAGE_OFFSET 0U
+#endif
+
+#if FLASH_IMAGE_OFFSET > 0xFFFFFFU
+#error "FLASH_IMAGE_OFFSET exceeds the 24-bit SPI address range"
+#endif
+
 #ifndef UART_TX_PAD
 #define UART_TX_PAD PAD_GPIO00
 #endif
@@ -182,6 +190,7 @@ static void flash_read(boot_code_t *data, unsigned int flash_addr,
                        unsigned int l2_addr, unsigned int size)
 {
     if (!data->hyperflash) {
+        flash_addr += FLASH_IMAGE_OFFSET;
         unsigned int *buffer = data->udma_buffer;
         int buff_size        = 7 * 4;
         /* make sure we don't exceed the max allowed SPI clk frequency. Ceiling
@@ -329,8 +338,9 @@ static void flash_get_mem_sections(boot_code_t *data)
                sizeof(data->header));
 
     int nb_area = data->header.nbAreas;
-    if (nb_area >= MAX_NB_AREA) {
+    if (nb_area > MAX_NB_AREA) {
         nb_area = MAX_NB_AREA;
+        data->header.nbAreas = MAX_NB_AREA;
     }
 
     if (nb_area)
@@ -515,7 +525,8 @@ void __attribute__((noreturn)) main(void)
         break;
     case BOOT_MODE_QSPI:
 #ifdef ENABLE_QSPI_BOOT
-        // Expose to QSPI Pads
+        // Keep the console available to applications loaded from flash.
+        io_mux_expose_uart();
         io_mux_expose_spi();
         boot_qspi(0, 1);
 #endif

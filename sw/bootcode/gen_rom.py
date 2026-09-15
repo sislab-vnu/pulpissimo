@@ -101,7 +101,7 @@ with open(args.outname, "w") as f:
     f.write(l.substitute(title=args.title, file_name=args.outname))
 
     s = Template(module)
-    sv_module = os.path.splitext(args.outname)[0]
+    sv_module = os.path.splitext(os.path.basename(args.outname))[0]
     f.write(s.substitute(module_name=sv_module, content=rom_str))
 
 f.close()

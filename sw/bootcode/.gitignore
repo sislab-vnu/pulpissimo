@@ -10,3 +10,4 @@ rom.bin
 *.s19
 *.map
 .venv
+/build/

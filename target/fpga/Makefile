@@ -12,6 +12,7 @@ all: genesys2 zcu104 nexys_video nexys arty zedboard zcu102 zcu106 ## Generates 
 clean_all: clean_genesys2 clean_zcu104 clean_nexys_video clean_arty clean_nexys clean_zedboard clean_zcu102 ## Removes synthesis output and bitstreams for all boards.
 
 .PHONY: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+.PHONY: arty_flash program_arty_flash
 $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl:
 	mkdir -p $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated
 	$(PULPISSIMO_UTILS)/bender script vivado -t fpga -t xilinx > $@
@@ -87,6 +88,14 @@ arty: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
 	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty/pulpissimo-arty.runs/impl_1/xilinx_pulpissimo.bit $(PULPISSIMO_FPGA_ROOT)/pulpissimo_arty.bit
 	cp $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty/pulpissimo-arty.runs/impl_1/xilinx_pulpissimo.bin $(PULPISSIMO_FPGA_ROOT)/pulpissimo_arty.bin
 	@echo "Bitstream generation for arty board finished. The bitstream Configuration Memory File was copied to ./pulpissimo_arty.bit and ./pulpissimo_arty.bin"
+
+## Builds an Arty A7-100T onboard-flash image containing the FPGA and APP_ELF
+arty_flash: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty onboard-flash-image
+
+## Programs the Arty A7-100T onboard flash with the FPGA and APP_ELF
+program_arty_flash: $(PULPISSIMO_FPGA_ROOT)/pulpissimo/tcl/generated/compile.tcl
+	$(MAKE) -C $(PULPISSIMO_FPGA_ROOT)/pulpissimo-arty program-onboard-flash
 
 ## Removes all bitstreams, *.log files and vivado related files (rm -rf vivado*) for the arty board.
 clean_arty:

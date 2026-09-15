@@ -94,10 +94,14 @@ LDFLAGS += -flto
 
 BOOTCODE = boot_code
 BOOTCODE_FPGA = boot_code_fpga
+BOOTCODE_ARTY_FPGA = build/arty/boot_code_fpga
+FLASH_IMAGE_OFFSET ?= 0x00400000
+ARTY_OFFSET_STAMP = build/arty/.flash-image-offset-$(FLASH_IMAGE_OFFSET)
 
 OBJS =  boot_code.o crt0.o \
 	zforth-riscv/zforth-main.o zforth-riscv/libc.o zforth-riscv/udma.o \
 	zforth-riscv/setjmp.o zforth/zforth.o kk_srec.o fll-v1.o io_mux/src/io_mux.o
+ARTY_FPGA_OBJS = $(addprefix build/arty/,$(OBJS))
 
 all: $(BOOTCODE) $(BOOTCODE_FPGA) boot.rtl boot.gvsoc
 
@@ -109,6 +113,11 @@ $(BOOTCODE):      $(OBJS)
 # need separate objects
 $(BOOTCODE_FPGA): CPPFLAGS += -DPERIPH_FREQUENCY=5000000
 $(BOOTCODE_FPGA): $(addsuffix .2,$(OBJS))
+
+$(BOOTCODE_ARTY_FPGA): CPPFLAGS += -DPERIPH_FREQUENCY=5000000 \
+	-DFLASH_IMAGE_OFFSET=$(FLASH_IMAGE_OFFSET)
+$(BOOTCODE_ARTY_FPGA): $(ARTY_FPGA_OBJS)
+	$(CC) $(LDFLAGS) $(TARGET_ARCH) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 # Makefile implicit rules for .o
 # %.o: %.c
@@ -130,6 +139,21 @@ $(BOOTCODE_FPGA): $(addsuffix .2,$(OBJS))
 
 %.o.2: %.S
 	$(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c -o $@ $<
+
+build/arty/%.o: %.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c -o $@ $<
+
+build/arty/%.o: %.S
+	@mkdir -p $(@D)
+	$(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c -o $@ $<
+
+build/arty/boot_code.o: $(ARTY_OFFSET_STAMP)
+
+$(ARTY_OFFSET_STAMP):
+	@mkdir -p $(@D)
+	$(RM) build/arty/.flash-image-offset-*
+	@touch $@
 
 %_fpga: %.o.2
 	$(CC) $(LDFLAGS) $(TARGET_ARCH) $^ $(LOADLIBES) $(LDLIBS) -o $@
@@ -170,6 +194,15 @@ asic_autogen_rom.sv: boot_code_asic.cde | venv
 fpga_autogen_rom.sv: boot_code_fpga.cde | venv
 	$(VENV)/python gen_rom.py boot_code_fpga.cde $@ --title "FPGA Bootrom for control_pulp"
 
+build/arty/boot_code_fpga.cde: $(BOOTCODE_ARTY_FPGA) | venv
+	$(OBJCOPY) --srec-len 1 --output-target=srec $< build/arty/boot_code_fpga.s19
+	$(VENV)/python s19toboot.py build/arty/boot_code_fpga.s19 $@ pulpissimo
+	$(SIZE) -A $<
+
+## Synthesizable FPGA boot ROM for Arty onboard-flash boot
+build/arty/fpga_autogen_rom.sv: build/arty/boot_code_fpga.cde | venv
+	$(VENV)/python gen_rom.py $< $@ --title "Arty onboard-flash FPGA Bootrom"
+
 ## Generate disassembly of the bootcode
 dis:
 	$(OBJDUMP) -d -S boot_code
@@ -182,6 +215,7 @@ clean:
 		boot_code_asic.cde boot_code_fpga.cde \
 		boot_code.map asic_autogen_rom.sv fpga_autogen_rom.sv \
 	  boot_code_asic.objdump boot_code_fpga.objdump boot_code_fpga.s19 bootcode.s
+	$(RM) -r build/arty
 
 
 .PHONY: TAGS

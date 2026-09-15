@@ -66,6 +66,15 @@ PULPissimo is connected to the following board peripherals:
 
 For more information consult board constraint files.
 
+I2C0 uses `L18` for SCL and `M18` for SDA on the ChipKit I2C header. The FPGA
+also enables the board's external pull-up resistors through `A14` and `A13`.
+Applications must select the I2C functions on the physical wrapper pads:
+
+```C
+io_mux_mode_set(PAD_GPIO30, PAD_MODE_I2C0_SDA);
+io_mux_mode_set(PAD_GPIO31, PAD_MODE_I2C0_SCL);
+```
+
 The current uDMA configuration does not instantiate I2S. The PMOD B signals
 retain their legacy I2S-oriented wrapper names but are available as muxed GPIO
 pads.

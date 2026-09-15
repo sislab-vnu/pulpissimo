@@ -58,8 +58,10 @@ module xilinx_pulpissimo (
   inout wire  pad_sdio_data2,
   inout wire  pad_sdio_data3,
 
-	inout wire	 pad_i2c0_sda, 
-  inout wire  pad_i2c0_scl, 
+  inout wire  pad_i2c0_sda,
+  inout wire  pad_i2c0_scl,
+  output wire pad_i2c0_sda_pup,
+  output wire pad_i2c0_scl_pup,
 
   inout wire  pad_i2s0_sck,
   inout wire  pad_i2s0_ws,
@@ -101,6 +103,10 @@ module xilinx_pulpissimo (
   // Arty A7 Rev E exposes the onboard QSPI clock on regular user I/O L16.
   // The onboard-flash build remaps these existing SPIM0 ports in a late XDC;
   // unlike boards wired through CCLK, no STARTUPE2 primitive is required.
+
+  // Enable the Arty's external pull-up resistors on the ChipKit I2C bus.
+  assign pad_i2c0_sda_pup = 1'b1;
+  assign pad_i2c0_scl_pup = 1'b1;
 
   pulpissimo #(
     .CORE_TYPE(CORE_TYPE),

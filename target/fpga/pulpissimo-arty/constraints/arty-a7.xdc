@@ -119,6 +119,8 @@ set_property -dict {PACKAGE_PIN C10 IOSTANDARD LVCMOS33} [get_ports switch1_i]
 ## I2C Bus
 set_property -dict {PACKAGE_PIN L18 IOSTANDARD LVCMOS33} [get_ports pad_i2c0_scl]
 set_property -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS33} [get_ports pad_i2c0_sda]
+set_property -dict {PACKAGE_PIN A14 IOSTANDARD LVCMOS33} [get_ports pad_i2c0_scl_pup]
+set_property -dict {PACKAGE_PIN A13 IOSTANDARD LVCMOS33} [get_ports pad_i2c0_sda_pup]
 
 ## PMOD D for SDIO
 set_property -dict {PACKAGE_PIN D4 IOSTANDARD LVCMOS33} [get_ports pad_sdio_clk]

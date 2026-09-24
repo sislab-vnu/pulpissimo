@@ -79,6 +79,15 @@ The current uDMA configuration does not instantiate I2S. The PMOD B signals
 retain their legacy I2S-oriented wrapper names but are available as muxed GPIO
 pads.
 
+### Deferred Hardware Validation
+
+The onboard GPIO test is pending until the board is physically accessible.
+Cycle LED1 through LED3 as outputs on `PAD_GPIO09` through `PAD_GPIO11`, then
+verify both levels from SW0, SW1, BTNC, BTND, BTNL, BTNR, and BTNU on
+`PAD_GPIO12` through `PAD_GPIO18`. Confirm the LED sequence visually and report
+each input transition over UART. The physical RESET button should also be
+checked during the same session.
+
 ### UART
 PULPissimo's UART port is mapped to the onboard FTDI FT2232H USB-UART bridge and thus accessible through the UART micro-USB connector (J6). The baud rate is 115200.
 

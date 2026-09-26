@@ -1,4 +1,9 @@
 overrides:
   gpio: { path: "hw/vendored_ips/gpio" } # Override to use the vendored in copy of
-                                      # the GPIO repo to allow reconfiguration
-                                      # of the number of GPIO pads.
+                                       # the GPIO repo to allow reconfiguration
+                                       # of the number of GPIO pads.
+  # adv_dbg_if v0.0.2 (pinned by pulp_soc 5.0.1) has a stray comma in its
+  # Bender.yml (`rtl/adbg_axi_biu.sv,`), which makes bender >= 0.29 fail with
+  # "[E31] File .../adbg_axi_biu.sv, doesn't exist". Redirect to v0.0.5, which
+  # fixes the manifest typo (upstream commit a2167df) plus two minor lint fixes.
+  adv_dbg_if: { git: "https://github.com/pulp-platform/adv_dbg_if.git", version: 0.0.5 }

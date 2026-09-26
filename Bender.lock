@@ -1,7 +1,7 @@
 packages:
   adv_dbg_if:
-    revision: 19eeef8cae1cbec7413877b3f29fe0bd078748d7
-    version: 0.0.2
+    revision: c4d7aa177ef96b0fdff8748f81bd15489446c95a
+    version: 0.0.5
     source:
       Git: https://github.com/pulp-platform/adv_dbg_if.git
     dependencies: []
